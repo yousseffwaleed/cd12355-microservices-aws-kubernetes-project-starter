@@ -11,7 +11,7 @@ The solution includes:
 - Flask-based analytics application
 - PostgreSQL with persistent storage
 - Amazon ECR for container image storage
-- AWS CodeBuild for CI/CD automation
+- AWS CodeBuild for CI/CD automation 
 - Kubernetes ConfigMap and Secret resources
 - Readiness and liveness health checks
 - Automated GitHub-triggered builds
