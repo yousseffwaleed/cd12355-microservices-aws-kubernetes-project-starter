@@ -4,72 +4,76 @@ A lightweight, cloud-native deployment for a Flask-based analytics service and P
 
 ## Overview
 
-This project demonstrates a simple but production-minded microservice setup for coworking analytics. It packages the Python application in Docker, stores images in Amazon ECR, and deploys the application and database to Kubernetes on AWS.
+This project demonstrates a production-minded microservice deployment using Docker, Kubernetes, and AWS services. The analytics application is containerized with Docker, stored in Amazon ECR, and deployed to Amazon EKS. PostgreSQL is deployed within the Kubernetes cluster using persistent storage.
 
 The solution includes:
 
-- A containerized Flask analytics app
-- PostgreSQL running in Kubernetes with persistent storage
-- CI/CD automation with AWS CodeBuild
-- Environment configuration via ConfigMap and Secret
-- Health checks and service-based connectivity
-- Clean deployment flow from GitHub to EKS
+- Flask-based analytics application
+- PostgreSQL with persistent storage
+- Amazon ECR for container image storage
+- AWS CodeBuild for CI/CD automation
+- Kubernetes ConfigMap and Secret resources
+- Readiness and liveness health checks
+- Automated GitHub-triggered builds
 
 ## Architecture
 
-The deployment follows this flow:
+The deployment workflow follows:
 
+```text
 GitHub → AWS CodeBuild → Amazon ECR → Amazon EKS
+```
 
-Within the cluster:
+Within the Kubernetes cluster:
 
+```text
 Analytics Pod → PostgreSQL Service → PostgreSQL Pod
+```
 
-This keeps application configuration separate from sensitive credentials while ensuring the service can access the database reliably through Kubernetes networking.
+Configuration data is stored separately from sensitive credentials using Kubernetes ConfigMaps and Secrets.
 
 ## Key Components
 
 ### Application
-- Flask-based analytics microservice
-- Packaged into a Docker image
-- Deployed as a Kubernetes Deployment
-- Exposed through a LoadBalancer Service
+
+- Flask analytics microservice
+- Dockerized and stored in Amazon ECR
+- Deployed using Kubernetes Deployments
+- Exposed through a Kubernetes LoadBalancer Service
 
 ### Database
-- PostgreSQL deployed as a Kubernetes workload
-- Persistent storage via Persistent Volume (PV) and Persistent Volume Claim (PVC)
-- Accessed through an internal Kubernetes service
+
+- PostgreSQL running in Kubernetes
+- Persistent storage through Persistent Volumes (PV) and Persistent Volume Claims (PVC)
+- Internal access through a Kubernetes service
 
 ### Configuration and Security
-- Kubernetes ConfigMap handles non-sensitive runtime settings
-- Kubernetes Secret stores credentials and sensitive values
-- Readiness and liveness probes keep the app healthy and resilient
+
+- ConfigMap stores non-sensitive runtime configuration
+- Secret stores database credentials
+- Liveness and readiness probes ensure service health and availability
 
 ## Deployment Workflow
 
-1. Code is pushed to GitHub.
-2. AWS CodeBuild builds the Docker image from the repository.
-3. The built image is pushed to Amazon ECR.
-4. Kubernetes pulls the latest image and deploys the updated app.
-5. The app connects to PostgreSQL through the internal service layer.
+1. Code is committed and pushed to GitHub.
+2. A GitHub webhook automatically triggers AWS CodeBuild.
+3. CodeBuild builds the Docker image using `buildspec.yaml`.
+4. The image is pushed to Amazon ECR.
+5. Kubernetes pulls the latest image from ECR.
+6. The application is deployed and connected to PostgreSQL through the Kubernetes service layer.
 
 ## Recommended Infrastructure
 
-A t3.medium worker node is a good fit for this workload. It balances cost and performance for a modest analytics service and PostgreSQL database in a development or small production setup.
+A `t3.medium` worker node provides a good balance of cost and performance for this workload. It offers sufficient CPU and memory for both the analytics service and PostgreSQL while remaining economical for development and small-scale deployments.
 
 ## Cost Optimization
 
-To keep cloud spend under control:
+- Use a single worker node for development environments.
+- Delete unused EKS clusters after project completion.
+- Remove unused ECR images and repositories.
+- Delete unused EBS volumes and AWS Load Balancers.
+- Regularly clean up unused cloud resources to avoid unexpected charges.
 
-- Delete unused EKS clusters when they are no longer needed
-- Remove load balancers, ECR repositories, and EBS volumes after teardown
-- Use a single-node cluster for development environments
-- Clean up unused Docker images and stale artifacts
+## Why This Design Works
 
-## Why This Setup Works
-
-This project combines Kubernetes, containerization, and AWS-native tooling to create a practical deployment pattern that is easy to extend. It is well suited for learning, prototyping, and small-scale cloud workloads where reliability and repeatable deployment matter.
-
----
-
-Built for a simple, scalable, and cloud-ready coworking analytics platform.
+This architecture combines containerization, Kubernetes orchestration, and AWS-native services to provide a repeatable deployment process. Automated builds, centralized image storage, infrastructure as code, and Kubernetes health probes improve reliability while keeping the solution simple and easy to maintain.
