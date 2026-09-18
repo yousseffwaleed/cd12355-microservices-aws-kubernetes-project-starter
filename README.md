@@ -11,17 +11,18 @@ The solution includes:
 - Flask-based analytics application
 - PostgreSQL with persistent storage
 - Amazon ECR for container image storage
-- AWS CodeBuild for CI/CD automation 
+- AWS CodeBuild for CI/CD automation
+- GitHub webhook integration for automated builds
 - Kubernetes ConfigMap and Secret resources
 - Readiness and liveness health checks
-- Automated GitHub-triggered builds
+- Amazon CloudWatch Container Insights monitoring
 
 ## Architecture
 
 The deployment workflow follows:
 
 ```text
-GitHub → AWS CodeBuild → Amazon ECR → Amazon EKS
+GitHub → GitHub Webhook → AWS CodeBuild → Amazon ECR → Amazon EKS
 ```
 
 Within the Kubernetes cluster:
@@ -44,7 +45,7 @@ Configuration data is stored separately from sensitive credentials using Kuberne
 ### Database
 
 - PostgreSQL running in Kubernetes
-- Persistent storage through Persistent Volumes (PV) and Persistent Volume Claims (PVC)
+- Persistent storage using Persistent Volumes (PV) and Persistent Volume Claims (PVC)
 - Internal access through a Kubernetes service
 
 ### Configuration and Security
@@ -53,14 +54,21 @@ Configuration data is stored separately from sensitive credentials using Kuberne
 - Secret stores database credentials
 - Liveness and readiness probes ensure service health and availability
 
+### Monitoring
+
+- Amazon CloudWatch Observability Add-on
+- CloudWatch Container Insights for application logs and metrics
+- Health and readiness checks monitored through CloudWatch logs
+
 ## Deployment Workflow
 
 1. Code is committed and pushed to GitHub.
 2. A GitHub webhook automatically triggers AWS CodeBuild.
 3. CodeBuild builds the Docker image using `buildspec.yaml`.
-4. The image is pushed to Amazon ECR.
+4. The Docker image is pushed to Amazon ECR.
 5. Kubernetes pulls the latest image from ECR.
 6. The application is deployed and connected to PostgreSQL through the Kubernetes service layer.
+7. Application logs and health metrics are collected through CloudWatch Container Insights.
 
 ## Recommended Infrastructure
 
@@ -72,8 +80,8 @@ A `t3.medium` worker node provides a good balance of cost and performance for th
 - Delete unused EKS clusters after project completion.
 - Remove unused ECR images and repositories.
 - Delete unused EBS volumes and AWS Load Balancers.
-- Regularly clean up unused cloud resources to avoid unexpected charges.
+- Regularly clean up unused cloud resources to avoid unnecessary costs.
 
 ## Why This Design Works
 
-This architecture combines containerization, Kubernetes orchestration, and AWS-native services to provide a repeatable deployment process. Automated builds, centralized image storage, infrastructure as code, and Kubernetes health probes improve reliability while keeping the solution simple and easy to maintain.
+This architecture combines containerization, Kubernetes orchestration, GitHub webhooks, and AWS-native services to provide a repeatable deployment process. Automated builds, centralized image storage, infrastructure as code, CloudWatch monitoring, and Kubernetes health probes improve reliability while keeping the solution simple and maintainable.
