@@ -54,12 +54,27 @@ Configuration data is stored separately from sensitive credentials using Kuberne
 - Secret stores database credentials
 - Liveness and readiness probes ensure service health and availability
 
-### Monitoring
+### Logging and Observability
 
-- Amazon CloudWatch Observability Add-on
-- CloudWatch Container Insights for application logs and metrics
-- Health and readiness checks monitored through CloudWatch logs
+Application logs are collected through Amazon CloudWatch Container Insights using the Amazon CloudWatch Observability add-on deployed to the EKS cluster.
 
+CloudWatch log group:
+
+```text
+/aws/containerinsights/my-cluster/application
+```
+
+The application periodically logs health and readiness probe activity, allowing operational monitoring through CloudWatch.
+
+Example log entries:
+
+```text
+GET /health_check HTTP/1.1" 200
+GET /readiness_check HTTP/1.1" 200
+INFO in app: {...}
+```
+
+These logs confirm that the application is operating normally and that Kubernetes health checks are succeeding.
 ## Deployment Workflow
 
 1. Code is committed and pushed to GitHub.
